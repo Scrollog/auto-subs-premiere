@@ -6,6 +6,7 @@ import { TranscriptProvider } from './TranscriptContext';
 import { ProgressProvider } from './ProgressContext';
 import { PresetsProvider } from './PresetsContext';
 import { ErrorDialogProvider } from './ErrorDialogContext';
+import { IntegrationProvider } from './IntegrationContext';
 
 import { PremiereProvider } from './PremiereContext';
 
@@ -36,13 +37,15 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
         <ModelsProvider>
           <ResolveProvider>
             <PremiereProvider>
-              <TranscriptProvider>
-                <ProgressProvider>
-                  <PresetsProvider>
-                    {children}
-                  </PresetsProvider>
-                </ProgressProvider>
-              </TranscriptProvider>
+              <IntegrationProvider>
+                <TranscriptProvider>
+                  <ProgressProvider>
+                    <PresetsProvider>
+                      {children}
+                    </PresetsProvider>
+                  </ProgressProvider>
+                </TranscriptProvider>
+              </IntegrationProvider>
             </PremiereProvider>
           </ResolveProvider>
         </ModelsProvider>

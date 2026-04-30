@@ -23,6 +23,7 @@ import { useTranscript } from "@/contexts/TranscriptContext"
 import { useSettings } from "@/contexts/SettingsContext"
 import { useResolve } from "@/contexts/ResolveContext"
 import { usePremiere } from "@/contexts/PremiereContext"
+import { useIntegration } from "@/contexts/IntegrationContext"
 import { useErrorDialog } from "@/contexts/ErrorDialogContext"
 import { ResolveApiError } from "@/api/resolve-api"
 import { languages, translateLanguages } from "@/lib/languages"
@@ -510,7 +511,7 @@ export function TranscriptionPanel({ onViewSubtitles }: { onViewSubtitles?: () =
     refresh: premiereRefresh,
   } = usePremiere()
 
-  const [selectedIntegration, setSelectedIntegration] = React.useState<"davinci" | "premiere">("davinci");
+  const { selectedIntegration, setSelectedIntegration } = useIntegration();
   const [hasInitializedIntegration, setHasInitializedIntegration] = React.useState(false);
 
   React.useEffect(() => {

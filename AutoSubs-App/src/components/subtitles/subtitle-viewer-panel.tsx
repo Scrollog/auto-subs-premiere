@@ -20,6 +20,7 @@ import { TextFormattingPanel } from "@/components/settings/text-formatting-panel
 import { useTranscript } from "@/contexts/TranscriptContext"
 import { useResolve } from "@/contexts/ResolveContext"
 import { usePremiere } from "@/contexts/PremiereContext"
+import { useIntegration } from "@/contexts/IntegrationContext"
 import { useSettings } from "@/contexts/SettingsContext"
 import { Speaker, Track } from "@/types"
 import { useTranslation } from "react-i18next"
@@ -571,8 +572,9 @@ export function SubtitleViewerPanel({ variant, isOpen = true, onClose }: Subtitl
   const { subtitles, currentTranscriptFilename, updateSubtitles, exportSubtitlesAs, importSubtitles, reformatSubtitles, speakers, updateSpeakers } = useTranscript()
   const { timelineInfo: resolveTimeline, pushToTimeline: resolvePush } = useResolve()
   const { timelineInfo: premiereTimeline, pushToTimeline: premierePush, isConnected: isPremiereConnected } = usePremiere()
-  
-  const isPremiereActive = isPremiereConnected;
+
+  const { selectedIntegration } = useIntegration()
+  const isPremiereActive = selectedIntegration === "premiere";
   const timelineInfo = isPremiereActive ? premiereTimeline : resolveTimeline;
   const pushToTimeline = isPremiereActive 
     ? (filename?: string, _selectedTemplate?: string, _selectedOutputTrack?: string, _presetSettings?: Record<string, unknown>) => premierePush(filename) 
@@ -608,7 +610,7 @@ export function SubtitleViewerPanel({ variant, isOpen = true, onClose }: Subtitl
   }, [searchCaseSensitive, searchQuery, searchWholeWord])
 
   const canReplace = variant === "desktop" ? Boolean(replaceValue.trim()) : Boolean(searchQuery.trim())
-  const isIntegrationConnected = Boolean(timelineInfo?.timelineId) || isPremiereConnected;
+  const isIntegrationConnected = isPremiereActive ? isPremiereConnected : Boolean(timelineInfo?.timelineId);
   const shellClassName = variant === "desktop"
     ? "flex flex-col h-full border-l bg-card/50"
     : "flex flex-col h-full min-h-0 bg-background"
