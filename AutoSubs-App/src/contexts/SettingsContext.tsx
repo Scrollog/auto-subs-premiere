@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS: Settings = {
   enableGpu: true, // gpu enabled by default on mac and linux, disabled by default on windows
   enableDiarize: false,
   maxSpeakers: null,
+  exportRange: "entire",
 
   // Text settings
   textDensity: "standard",
