@@ -185,8 +185,6 @@ function TranscriptionPanelView({
   onSelectedIntegrationChange,
 }: TranscriptionPanelViewProps) {
   const { t, i18n } = useTranslation()
-  const { refresh: refreshResolve } = useResolve()
-  const { refresh: refreshPremiere } = usePremiere()
   const { settings: currentSettings, updateSetting } = useSettings()
   const isPremiereActive = selectedIntegration === "premiere";
   const isTourActive = !currentSettings.tourCompleted
@@ -268,17 +266,6 @@ function TranscriptionPanelView({
 
   const handleTrackSelectorOpen = async (open: boolean) => {
     setOpenTrackSelector(open)
-    if (open && !currentSettings.isStandaloneMode) {
-      try {
-        if (selectedIntegration === "premiere") {
-          await refreshPremiere()
-        } else {
-          await refreshResolve()
-        }
-      } catch (error) {
-        console.error("Failed to refresh timeline info:", error)
-      }
-    }
   }
 
   return (
@@ -649,7 +636,6 @@ export function TranscriptionPanel({ onViewSubtitles }: { onViewSubtitles?: () =
     setExportProgress: resolveSetExportProgress,
     cancelRequestedRef: resolveCancelRequestedRef,
     getSourceAudio: resolveGetSourceAudio,
-    refresh: resolveRefresh,
   } = useResolve()
 
   const {
@@ -659,7 +645,6 @@ export function TranscriptionPanel({ onViewSubtitles }: { onViewSubtitles?: () =
     isExporting: premiereIsExporting,
     exportProgress: premiereExportProgress,
     getSourceAudio: premiereGetSourceAudio,
-    refresh: premiereRefresh,
   } = usePremiere()
 
   const { selectedIntegration, setSelectedIntegration } = useIntegration();
@@ -671,14 +656,6 @@ export function TranscriptionPanel({ onViewSubtitles }: { onViewSubtitles?: () =
       setHasInitializedIntegration(true);
     }
   }, [isPremiereConnected, hasInitializedIntegration]);
-
-  React.useEffect(() => {
-    if (selectedIntegration === "premiere" && isPremiereConnected) {
-      premiereRefresh();
-    } else if (selectedIntegration === "davinci") {
-      resolveRefresh();
-    }
-  }, [selectedIntegration, isPremiereConnected, premiereRefresh, resolveRefresh]);
 
   const isPremiereActive = selectedIntegration === "premiere";
   const timelineInfo = isPremiereActive ? premiereTimeline : resolveTimeline;

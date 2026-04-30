@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { TimelineInfo } from '@/types';
 import { getTimelineInfo, cancelExport, addSubtitlesToTimeline } from '@/api/resolve-api';
@@ -27,28 +27,34 @@ export function ResolveProvider({ children }: { children: React.ReactNode }) {
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [exportProgress, setExportProgress] = useState<number>(0);
   const cancelRequestedRef = useRef<boolean>(false);
+  const emptyTimelineInfo: TimelineInfo = { name: "", timelineId: "", templates: [], inputTracks: [], outputTracks: [] };
 
-  // Keep trying to connect to Resolve in the background while disconnected.
+  // Keep trying to connect to Resolve in the background.
   // A single one-shot attempt on mount misses two common situations: the app
   // rendering before the Lua server has finished binding (race on launch), and
   // the user reopening the app after the server was shut down by a previous
-  // session's Exit command.  Polling every 5 s is cheap — GetTimelineInfo is a
+  // session's Exit command.  Polling every 5 s — GetTimelineInfo is a
   // lightweight call — and gives the user an automatic reconnect rather than
-  // requiring a manual refresh click.
+  // requiring a manual refresh click. Errors are suppressed to avoid console flooding.
   useEffect(() => {
     let cancelled = false;
     let polling = false;
+    let intervalId: NodeJS.Timeout | null = null;
 
     async function tryConnect() {
-      if (polling) return;
+      if (polling || cancelled) return;
       polling = true;
       try {
         const info = await getTimelineInfo().catch(() => null);
         if (!cancelled && info && info.timelineId) {
           setTimelineInfo(info);
+        } else if (!cancelled) {
+          setTimelineInfo(emptyTimelineInfo);
         }
       } catch {
-        // ignore — we'll retry on the next interval
+        if (!cancelled) {
+          setTimelineInfo(emptyTimelineInfo);
+        }
       } finally {
         polling = false;
       }
@@ -56,33 +62,36 @@ export function ResolveProvider({ children }: { children: React.ReactNode }) {
 
     tryConnect();
 
-    const interval = setInterval(() => {
-      // Only poll while disconnected to avoid redundant Resolve API calls
-      // during normal operation.
-      setTimelineInfo(current => {
-        if (!current.timelineId) {
-          tryConnect();
-        }
-        return current;
-      });
+    intervalId = setInterval(() => {
+      if (!cancelled && !polling) {
+        tryConnect();
+      }
     }, 5000);
 
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
     };
   }, []);
 
-  async function refresh() {
+  const refresh = useCallback(async () => {
     try {
       let newTimelineInfo = await getTimelineInfo();
       setTimelineInfo(newTimelineInfo);
     } catch (error) {
-      // setError will be handled by calling context if needed
-      console.error("Failed to get current timeline:", error);
+      // Silently fail for connection errors to avoid console flooding
+      // The calling context can handle UI updates if needed
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('Connection refused') || errorMessage.includes('tcp connect error')) {
+        // Connection refused - Resolve is not running, fail silently
+        return;
+      }
+      // For other errors, still throw but don't log to console
       throw error;
     }
-  }
+  }, []);
 
   async function pushToTimeline(
     filename?: string,

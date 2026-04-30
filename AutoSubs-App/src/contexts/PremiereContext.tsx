@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { toast } from 'sonner';
 import { TimelineInfo } from '@/types';
@@ -112,11 +112,11 @@ export function PremiereProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  async function refresh() {
+  const refresh = useCallback(async () => {
     try {
       const result = await sendRequestAndWait((sid) => requestSequenceInfo(sid));
       const data = typeof result === 'string' ? JSON.parse(result) : result;
-      
+
       if (data && data.success) {
         setTimelineInfo({
           name: data.name || data.sequenceName || "Sequence",
@@ -135,7 +135,7 @@ export function PremiereProvider({ children }: { children: React.ReactNode }) {
       console.error("Failed to refresh Premiere info:", error);
       toast.error("Failed to communicate with Premiere Pro");
     }
-  }
+  }, []);
 
   async function pushToTimeline(filename?: string) {
     if (!filename) return;

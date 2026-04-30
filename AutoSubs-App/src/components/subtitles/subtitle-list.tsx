@@ -11,7 +11,7 @@ import { SpeakerSettings } from "@/components/common/speaker-settings"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 const ESTIMATED_SUBTITLE_ROW_HEIGHT = 96;
-const SUBTITLE_ROW_OVERSCAN = 8;
+const SUBTITLE_ROW_OVERSCAN = 24;
 
 interface SubtitleListProps {
     searchQuery?: string;
@@ -375,7 +375,7 @@ const SubtitleList = ({
                         key={subtitle.id}
                         ref={(node) => measureRow(subtitle.id, node)}
                         style={{ transform: `translateY(${offsetTop}px)` }}
-                        className={`group absolute left-0 right-0 top-0 flex flex-col items-start gap-2 border-b border-l-2 border-l-transparent p-4 text-sm leading-tight transition-colors duration-150 hover:bg-muted/50 dark:hover:bg-muted/20 [content-visibility:auto] [contain-intrinsic-size:auto_96px] ${isSelected ? "bg-muted/50 dark:bg-muted/20 border-l-primary" : ""} ${itemClassName}`}
+                        className={`group absolute left-0 right-0 top-0 flex flex-col items-start gap-2 border-b border-l-2 border-l-transparent p-4 text-sm leading-tight transition-colors duration-150 hover:bg-muted/50 dark:hover:bg-muted/20 ${isSelected ? "bg-muted/50 dark:bg-muted/20 border-l-primary" : ""} ${itemClassName}`}
                         onClick={() => selectSubtitle(index)}
                     >
                                     <div className="flex w-full items-center gap-2">
