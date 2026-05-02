@@ -152,8 +152,8 @@ interface TranscriptionPanelViewProps {
   onStart?: () => void
   onCancel?: () => void
   isProcessing?: boolean
-  selectedIntegration: "davinci" | "premiere"
-  onSelectedIntegrationChange: (integration: "davinci" | "premiere") => void
+  selectedIntegration: "davinci" | "premiere" | "aftereffects"
+  onSelectedIntegrationChange: (integration: "davinci" | "premiere" | "aftereffects") => void
 }
 
 function TranscriptionPanelView({
@@ -186,7 +186,7 @@ function TranscriptionPanelView({
 }: TranscriptionPanelViewProps) {
   const { t, i18n } = useTranslation()
   const { settings: currentSettings, updateSetting } = useSettings()
-  const isPremiereActive = selectedIntegration === "premiere";
+  const isPremiereActive = selectedIntegration === "premiere" || selectedIntegration === "aftereffects" || selectedIntegration === "premierepro";
   const isTourActive = !currentSettings.tourCompleted
   const uploadIconRef = React.useRef<UploadIconHandle>(null)
   const dropAreaUploadIconRef = React.useRef<UploadIconHandle>(null)
@@ -306,8 +306,8 @@ function TranscriptionPanelView({
               <DropdownMenuTrigger asChild onPointerDown={() => onStandaloneModeChange(false)}>
                 <TabsTrigger value="timeline" data-state={!isStandaloneMode ? "active" : "inactive"} className="text-sm px-4 flex items-center gap-1" onPointerDown={() => onStandaloneModeChange(false)}>
                   <img
-                    src={selectedIntegration === "premiere" ? "/premiere-logo.png" : "/davinci-resolve-logo.png"}
-                    alt={selectedIntegration === "premiere" ? "Premiere Pro" : "DaVinci Resolve"}
+                    src={selectedIntegration === "premiere" ? "/premiere-logo.png" : selectedIntegration === "aftereffects" ? "/aftereffects-logo.png" : "/davinci-resolve-logo.png"}
+                    alt={selectedIntegration === "premiere" ? "Premiere Pro" : selectedIntegration === "aftereffects" ? "After Effects" : "DaVinci Resolve"}
                     className="w-5 h-5 mr-1"
                   />
                   {t("actionBar.mode.timeline")}
@@ -328,6 +328,13 @@ function TranscriptionPanelView({
                 }} className="cursor-pointer">
                   <img src="/premiere-logo.png" alt="Premiere" className="w-4 h-4 mr-2" />
                   <span>Premiere Pro</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => {
+                  onStandaloneModeChange(false);
+                  onSelectedIntegrationChange("aftereffects");
+                }} className="cursor-pointer">
+                  <img src="/aftereffects-logo.png" alt="After Effects" className="w-4 h-4 mr-2" />
+                  <span>After Effects</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -652,12 +659,15 @@ export function TranscriptionPanel({ onViewSubtitles }: { onViewSubtitles?: () =
 
   React.useEffect(() => {
     if (!hasInitializedIntegration && isPremiereConnected) {
-      setSelectedIntegration("premiere");
+      // Only auto-select Premiere if we haven't already selected an Adobe app
+      if (selectedIntegration !== "aftereffects") {
+        setSelectedIntegration("premiere");
+      }
       setHasInitializedIntegration(true);
     }
-  }, [isPremiereConnected, hasInitializedIntegration]);
+  }, [isPremiereConnected, hasInitializedIntegration, selectedIntegration, setSelectedIntegration]);
 
-  const isPremiereActive = selectedIntegration === "premiere";
+  const isPremiereActive = selectedIntegration === "premiere" || selectedIntegration === "aftereffects" || selectedIntegration === "premierepro";
   const timelineInfo = isPremiereActive ? premiereTimeline : resolveTimeline;
   const getSourceAudio = isPremiereActive ? premiereGetSourceAudio : resolveGetSourceAudio;
   const pushToTimeline = isPremiereActive 

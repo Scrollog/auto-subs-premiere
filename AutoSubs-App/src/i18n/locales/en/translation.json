@@ -500,6 +500,19 @@
         "disconnected": "Extension disconnected",
         "openPremiere": "Open Premiere Pro to connect automatically."
       }
+    },
+    "aftereffects": {
+      "productName": "After Effects",
+      "status": {
+        "connected": "Connected",
+        "disconnected": "Disconnected"
+      },
+      "tooltip": {
+        "connected": "Connected",
+        "canGetAudio": "You can get audio from the composition and add subtitles back to it.",
+        "disconnected": "Extension disconnected",
+        "openAfterEffects": "Open After Effects to connect automatically."
+      }
     }
   },
   "theme": {

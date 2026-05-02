@@ -574,7 +574,7 @@ export function SubtitleViewerPanel({ variant, isOpen = true, onClose }: Subtitl
   const { timelineInfo: premiereTimeline, pushToTimeline: premierePush, isConnected: isPremiereConnected } = usePremiere()
 
   const { selectedIntegration } = useIntegration()
-  const isPremiereActive = selectedIntegration === "premiere";
+  const isPremiereActive = selectedIntegration === "premiere" || selectedIntegration === "aftereffects" || selectedIntegration === "premierepro";
   const timelineInfo = isPremiereActive ? premiereTimeline : resolveTimeline;
   const pushToTimeline = isPremiereActive 
     ? (filename?: string, _selectedTemplate?: string, _selectedOutputTrack?: string, _presetSettings?: Record<string, unknown>) => premierePush(filename) 
@@ -723,7 +723,7 @@ export function SubtitleViewerPanel({ variant, isOpen = true, onClose }: Subtitl
           onAddToTimeline={handleAddToTimeline}
           t={t}
           isAdding={isAddingToTimeline}
-          selectedIntegration={isPremiereActive ? "premiere" : "davinci"}
+          selectedIntegration={selectedIntegration as any}
         />
       )}
     </div>

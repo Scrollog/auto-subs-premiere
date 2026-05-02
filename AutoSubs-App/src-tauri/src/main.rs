@@ -114,7 +114,6 @@ fn main() {
                 }
             }
             if let Some(window) = app.get_webview_window("main") {
-                let _ = app.handle().show();
                 let _ = window.show();
                 let _ = window.unminimize();
                 let _ = window.set_focus();
@@ -304,7 +303,6 @@ fn main() {
                         for delay_ms in [100_u64, 500, 1200] {
                             tokio::time::sleep(Duration::from_millis(delay_ms)).await;
                             if let Some(window) = app_handle.get_webview_window("main") {
-                                let _ = app_handle.show();
                                 let _ = window.show();
                                 let _ = window.unminimize();
                                 let _ = window.set_focus();

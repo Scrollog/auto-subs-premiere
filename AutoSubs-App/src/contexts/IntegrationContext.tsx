@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 
-export type Integration = "davinci" | "premiere";
+export type Integration = "davinci" | "premiere" | "aftereffects";
 
 interface IntegrationContextType {
   selectedIntegration: Integration;

@@ -35,9 +35,9 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
     <ErrorDialogProvider>
       <SettingsProvider>
         <ModelsProvider>
-          <ResolveProvider>
-            <PremiereProvider>
-              <IntegrationProvider>
+          <IntegrationProvider>
+            <ResolveProvider>
+              <PremiereProvider>
                 <TranscriptProvider>
                   <ProgressProvider>
                     <PresetsProvider>
@@ -45,9 +45,9 @@ export function GlobalProvider({ children }: GlobalProviderProps) {
                     </PresetsProvider>
                   </ProgressProvider>
                 </TranscriptProvider>
-              </IntegrationProvider>
-            </PremiereProvider>
-          </ResolveProvider>
+              </PremiereProvider>
+            </ResolveProvider>
+          </IntegrationProvider>
         </ModelsProvider>
       </SettingsProvider>
     </ErrorDialogProvider>

@@ -2,7 +2,8 @@
 
 import { ns } from "../shared/shared";
 
-import * as ppro from "./ppro/ppro"; 
+import * as ppro from "./ppro/ppro";
+import * as aeft from "./aeft/aeft";
 
 //@ts-ignore
 const host = typeof $ !== "undefined" ? $ : window;
@@ -15,63 +16,63 @@ const getAppNameSafely = (): ApplicationName | "unknown" => {
     return a.toLowerCase().indexOf(b.toLowerCase()) > -1;
   };
   const exists = (a: any) => typeof a !== "undefined";
-  const isBridgeTalkWorking =
-    typeof BridgeTalk !== "undefined" &&
-    typeof BridgeTalk.appName !== "undefined";
 
-  if (isBridgeTalkWorking) {
-    return BridgeTalk.appName;
-  } else if (app) {
-    //@ts-ignore
-    if (exists(app.name)) {
-      //@ts-ignore
-      const name: string = app.name;
-      if (compare(name, "photoshop")) return "photoshop";
-      if (compare(name, "illustrator")) return "illustrator";
-      if (compare(name, "audition")) return "audition";
-      if (compare(name, "bridge")) return "bridge";
-      if (compare(name, "indesign")) return "indesign";
+  try {
+    // 1. Direct check via app.name (common in AE)
+    if (typeof app !== "undefined" && app.name) {
+      const name = app.name.toLowerCase();
+      if (compare(name, "after effects")) return "aftereffects";
+      if (compare(name, "premiere")) return "premierepro";
     }
-    //@ts-ignore
-    if (exists(app.appName)) {
-      //@ts-ignore
-      const appName: string = app.appName;
-      if (compare(appName, "after effects")) return "aftereffects";
-      if (compare(appName, "animate")) return "animate";
+
+    // 2. BridgeTalk (standard but can be broken)
+    if (typeof BridgeTalk !== "undefined" && BridgeTalk.appName) {
+      return BridgeTalk.appName as ApplicationName;
     }
-    //@ts-ignore
-    if (exists(app.path)) {
-      //@ts-ignore
-      const path = app.path;
-      if (compare(path, "premiere")) return "premierepro";
+
+    // 3. Fallback checks
+    if (typeof app !== "undefined") {
+      if (exists(app.appName)) {
+        const appName = app.appName.toLowerCase();
+        if (compare(appName, "after effects")) return "aftereffects";
+      }
     }
-    //@ts-ignore
-    if (exists(app.getEncoderHost) && exists(AMEFrontendEvent)) {
-      return "ame";
-    }
+  } catch (e) {
+    // ignore
   }
   return "unknown";
 };
 
-switch (getAppNameSafely()) {
-  
-  
-  
-  
-  
-  
-  
-  
+const detectedApp = getAppNameSafely();
+$.writeln("[AutoSubs] Detected host app: " + detectedApp);
+
+switch (detectedApp) {
+  case "aftereffects":
+  case "aftereffectsbeta":
+    $.writeln("[AutoSubs] Mapping AEFT functions...");
+    host[ns] = aeft;
+    break;
   case "premierepro":
   case "premiereprobeta":
+    $.writeln("[AutoSubs] Mapping PPRO functions...");
     host[ns] = ppro;
+    break;
+  default:
+    // If we can't detect, but app object looks like AE, assume AE
+    if (typeof app !== "undefined" && typeof CompItem !== "undefined") {
+      $.writeln("[AutoSubs] Fallback to After Effects detection");
+      host[ns] = aeft;
+    } else {
+      $.writeln("[AutoSubs] Could not determine app, functions might not be available");
+    }
     break;
 }
 
 const empty = {};
 // prettier-ignore
 export type Scripts = typeof empty
-  & typeof ppro 
+  & typeof ppro
+  & typeof aeft
   ;
 
 // https://extendscript.docsforadobe.dev/interapplication-communication/bridgetalk-class.html?highlight=bridgetalk#appname

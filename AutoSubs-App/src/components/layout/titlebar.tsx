@@ -37,13 +37,20 @@ import { TranscriptSearchPopover } from "@/components/common/transcript-search-p
 
 import { useResolve } from "@/contexts/ResolveContext";
 import { usePremiere } from "@/contexts/PremiereContext";
+import { useIntegration } from "@/contexts/IntegrationContext";
 
 
 
 function IntegrationStatus() {
   const { t } = useTranslation();
   const { timelineInfo: resolveTimeline } = useResolve();
-  const { timelineInfo: premiereTimeline, isConnected: isPremiereConnected } = usePremiere();
+  const {
+    premiereTimeline,
+    afterEffectsTimeline,
+    isPremiereConnected,
+    isAfterEffectsConnected
+  } = usePremiere();
+  const { selectedIntegration, setSelectedIntegration } = useIntegration();
 
   const isResolveConnected = resolveTimeline && resolveTimeline.timelineId;
 
@@ -112,6 +119,7 @@ function IntegrationStatus() {
         <HoverCardTrigger asChild>
           <Button
             variant="ghost"
+            onClick={() => setSelectedIntegration("premiere")}
             className={`flex items-center gap-2 h-7 text-xs rounded px-2 ${isPremiereConnected
               ? "hover:bg-green-100 hover:text-green-700 dark:hover:bg-green-900 dark:hover:text-green-300"
               : "hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-950 dark:hover:text-red-300"
@@ -123,7 +131,7 @@ function IntegrationStatus() {
             <img
               src="/premiere-logo.png"
               alt="Premiere Pro"
-              className="h-4 w-4 opacity-80"
+              className="h-4 w-4"
             />
             <span className="max-w-[120px] truncate">
               {isPremiereConnected
@@ -152,11 +160,70 @@ function IntegrationStatus() {
                 </div>
               ) : (
                 <div className="space-y-1">
-                  <p className="text-xs text-red-600 dark:text-red-400">
+                  <p className="text-xs text-red-600 dark:text-red-400 font-medium">
                     {t("titlebar.premiere.tooltip.disconnected")}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
                     {t("titlebar.premiere.tooltip.openPremiere")}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </HoverCardContent>
+      </HoverCard>
+
+      {/* After Effects */}
+      <HoverCard openDelay={400}>
+        <HoverCardTrigger asChild>
+          <Button
+            variant="ghost"
+            onClick={() => setSelectedIntegration("aftereffects")}
+            className={`flex items-center gap-2 h-7 text-xs rounded px-2 ${isAfterEffectsConnected
+              ? "hover:bg-green-100 hover:text-green-700 dark:hover:bg-green-900 dark:hover:text-green-300"
+              : "hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-950 dark:hover:text-red-300"
+              }`}
+          >
+            <div
+              className={`w-2 h-2 rounded-full ${isAfterEffectsConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
+            <img
+              src="/aftereffects-logo.png"
+              alt="After Effects"
+              className="h-4 w-4"
+            />
+            <span className="max-w-[120px] truncate">
+              {isAfterEffectsConnected
+                ? (afterEffectsTimeline?.name || t("titlebar.aftereffects.status.connected"))
+                : t("titlebar.aftereffects.productName")}
+            </span>
+          </Button>
+        </HoverCardTrigger>
+        <HoverCardContent className="w-72 z-50">
+          <div className="flex items-start gap-3">
+            <img
+              src="/aftereffects-logo.png"
+              alt="After Effects"
+              className="h-8 w-8"
+            />
+            <div className="space-y-1">
+              <h4 className="text-sm font-semibold">{t("titlebar.aftereffects.productName")}</h4>
+              {isAfterEffectsConnected ? (
+                <div className="space-y-1">
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    {t("titlebar.aftereffects.tooltip.connected")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("titlebar.aftereffects.tooltip.canGetAudio")}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <p className="text-xs text-red-600 dark:text-red-400 font-medium">
+                    {t("titlebar.aftereffects.tooltip.disconnected")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    {t("titlebar.aftereffects.tooltip.openAfterEffects")}
                   </p>
                 </div>
               )}
@@ -182,9 +249,9 @@ function SettingsDropdown() {
   // download/management pattern.
   const managerModels: Model[] = downloadedModelValues.includes(diarizeModel.value)
     ? [
-        ...modelsState,
-        { ...diarizeModel, isDownloaded: true },
-      ]
+      ...modelsState,
+      { ...diarizeModel, isDownloaded: true },
+    ]
     : modelsState;
 
   const handleThemeChange = (themeValue: string) => {
@@ -231,7 +298,7 @@ function SettingsDropdown() {
                 rel="noopener noreferrer"
                 className="group"
               >
-                <GitMerge/>
+                <GitMerge />
                 <span>{t("settings.support.viewSource", "View Source")}</span>
               </a>
             </DropdownMenuItem>
@@ -412,10 +479,10 @@ export function Titlebar({ onOpenCompactViewer }: { onOpenCompactViewer?: () => 
 
   const centerContent =
     phase === "downloading" ||
-    phase === "ready" ||
-    phase === "installing" ||
-    phase === "restarting" ||
-    phase === "available-link" ? (
+      phase === "ready" ||
+      phase === "installing" ||
+      phase === "restarting" ||
+      phase === "available-link" ? (
       <UpdateStatusIndicator
         phase={phase}
         percentage={percentage}

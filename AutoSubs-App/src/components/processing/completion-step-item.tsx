@@ -17,7 +17,7 @@ export interface CompletionStepProps {
     onViewSubtitles?: () => void;
     settings: Settings;
     timelineInfo: TimelineInfo;
-    selectedIntegration?: "davinci" | "premiere";
+    selectedIntegration?: "davinci" | "premiere" | "aftereffects";
 }
 
 export function CompletionStepItem({
@@ -29,8 +29,8 @@ export function CompletionStepItem({
     selectedIntegration
 }: CompletionStepProps) {
     const { t } = useTranslation()
-    const isResolveConnected = Boolean(timelineInfo?.timelineId) && selectedIntegration !== "premiere"
-    const isPremiereConnected = Boolean(timelineInfo?.timelineId) && selectedIntegration === "premiere"
+    const isResolveConnected = Boolean(timelineInfo?.timelineId) && selectedIntegration === "davinci"
+    const isPremiereConnected = Boolean(timelineInfo?.timelineId) && (selectedIntegration === "premiere" || selectedIntegration === "aftereffects")
 
     return (
         <div className="flex w-full flex-col gap-2">
